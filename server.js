@@ -13,9 +13,9 @@ let books = [
   { id: 2, title: "To Kill a Mockingbird", author: "Harper Lee", year: 1960 },
 ];
 
-// Set EJS as the view engine
+// Always EJS and view engine
 app.set("view engine", "ejs");
-app.set("views", "./views"); // Views directory for EJS files
+app.set("views", "./views");
 
 // Middleware to log request details
 app.use((req, res, next) => {
@@ -76,7 +76,7 @@ app.delete("/books/:id", (req, res) => {
   res.status(204).send(); // No content, successful deletion
 });
 
-// GET route to display details of a single book
+// GET route to display details of a single book - /books/id number
 app.get("/books/:id", (req, res) => {
   const { id } = req.params; // Get the book ID from the URL
   const book = books.find((b) => b.id === parseInt(id)); // Find the book by ID
@@ -91,8 +91,8 @@ app.get("/books/:id", (req, res) => {
 
 // Error-handling middleware
 app.use((err, req, res, next) => {
-  console.error(err.message); // Log the error message
-  res.status(500).json({ error: err.message }); // Send 500 status error
+  console.error(err.message); // Logs error message
+  res.status(500).json({ error: err.message });
 });
 
 // Start the server

@@ -32,7 +32,7 @@
     </form>
 
     <script>
-      // JavaScript to handle the form submission using fetch
+      // Handles new Book Submissions
       document
         .getElementById("addBookForm")
         .addEventListener("submit", function (e) {
@@ -42,7 +42,7 @@
           const author = document.getElementById("author").value;
           const year = document.getElementById("year").value;
 
-          // Send a POST request to the API to add a new book
+          // Send a POST to API to add a new book
           fetch("/books", {
             method: "POST",
             headers: {
@@ -52,7 +52,7 @@
           })
             .then((response) => response.json()) // Parse the response JSON
             .then((newBook) => {
-              // Add the new book to the list without reloading the page
+              // Add the new book to the list w/o reloading page
               const bookList = document.getElementById("bookList");
               const newBookItem = document.createElement("li");
               newBookItem.innerHTML = `<strong>${newBook.title}</strong> by ${newBook.author} (Year: ${newBook.year})`;
