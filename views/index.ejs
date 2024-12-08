@@ -1,41 +1,42 @@
-<!-- views/index.ejs -->
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Book Tracker</title>
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
     <h1>Book Tracker</h1>
 
     <h2>Books List</h2>
-    <ul>
+    <ul id="bookList">
       <% books.forEach(function(book) { %>
       <li>
         <strong><%= book.title %></strong> by <%= book.author %> (Year: <%=
-        book.year %>) - <a href="/books/<%= book.id %>">View Details</a>
+        book.year %>)
       </li>
       <% }) %>
     </ul>
 
     <h2>Add a New Book</h2>
-    <form action="/books" method="POST">
+    <!-- Form to add a new book -->
+    <form id="addBookForm">
       <label for="title">Title: </label>
-      <input type="text" name="title" required /><br />
+      <input type="text" id="title" name="title" required /><br />
       <label for="author">Author: </label>
-      <input type="text" name="author" required /><br />
+      <input type="text" id="author" name="author" required /><br />
       <label for="year">Year: </label>
-      <input type="number" name="year" required /><br />
+      <input type="number" id="year" name="year" required /><br />
       <button type="submit">Add Book</button>
     </form>
 
     <script>
-      // Form submission using fetch
+      // JavaScript to handle the form submission using fetch
       document
         .getElementById("addBookForm")
         .addEventListener("submit", function (e) {
-          e.preventDefault(); // Stops form from reloading page
+          e.preventDefault(); // Prevent the form from reloading the page
 
           const title = document.getElementById("title").value;
           const author = document.getElementById("author").value;
@@ -49,15 +50,15 @@
             },
             body: JSON.stringify({ title, author, year }),
           })
-            .then((response) => response.json())
-            .then((data) => {
-              // Add the new book to the list w/o reload page
+            .then((response) => response.json()) // Parse the response JSON
+            .then((newBook) => {
+              // Add the new book to the list without reloading the page
               const bookList = document.getElementById("bookList");
               const newBookItem = document.createElement("li");
-              newBookItem.innerHTML = `<strong>${data.title}</strong> by ${data.author} (Year: ${data.year})`;
+              newBookItem.innerHTML = `<strong>${newBook.title}</strong> by ${newBook.author} (Year: ${newBook.year})`;
               bookList.appendChild(newBookItem);
 
-              // Clear the form fields
+              // Clear the form fields after submission
               document.getElementById("title").value = "";
               document.getElementById("author").value = "";
               document.getElementById("year").value = "";

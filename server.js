@@ -5,6 +5,8 @@ const port = 3000;
 // Middleware to parse incoming request bodies
 app.use(express.json());
 
+app.use(express.static("public"));
+
 // Temporary array to hold books
 let books = [
   { id: 1, title: "1984", author: "George Orwell", year: 1949 },
