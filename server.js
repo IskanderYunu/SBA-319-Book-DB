@@ -1,22 +1,38 @@
 //npm install mongoose!
 //define schema!
 
+const Book = require("./models/Book.js");
 const express = require("express");
 const app = express();
-const port = 3000;
-const mongoose = require("mongoose");
+
+const dotenv = require("dotenv");
+dotenv.config();
+const PORT = process.env.PORT || 5050;
+const db = require("./db/conn");
 
 // Middleware to parse incoming request bodies
 app.use(express.json());
 
 app.use(express.static("public"));
 
-// Temporary array to hold books
+// Sample Data - Temporary array to hold books
 let books = [
   { id: 1, title: "1984", author: "George Orwell", year: 1949 },
   { id: 2, title: "To Kill a Mockingbird", author: "Harper Lee", year: 1960 },
 ];
 
+//Inserting Sample data
+async function seedData() {
+  try {
+    await Book.deleteMany(); // Collection Clear
+    const insertedBooks = await Book.insertMany(books);
+    console.log("bookData inserted:", insertedBooks);
+  } catch (err) {
+    console.error("Data Error:", err);
+  }
+}
+
+seedData();
 // Always EJS and view engine
 app.set("view engine", "ejs");
 app.set("views", "./views");
@@ -27,36 +43,51 @@ app.use((req, res, next) => {
   next();
 });
 
-//Mongoose GET
-const Book = require("./models/Book"); // Assuming you have a Mongoose model for books
-
 app.get("/", async (req, res) => {
   try {
-    const books = await Book.find(); // Retrieve all books from the MongoDB collection
-    res.render("index", { books }); // Pass the books array to the view
+    const books = await Book.find(); // Gets all books from the MongoDB
+    res.render("index", { books }); // Passes the books
   } catch (error) {
-    res.status(500).json({ error: "Error fetching books" });
+    res.status(500).json({ error: "Error fetching your books" });
+  }
+});
+
+// POST route to add a new book
+app.post("/books", async (req, res) => {
+  const { title, author, year } = req.body;
+
+  try {
+    // Create a new book document
+    const newBook = new Book({ title, author, year });
+
+    // Save the new book to the database
+    await newBook.save();
+
+    // Return the newly created book
+    res.status(201).json(newBook);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
   }
 });
 
 //Mongoose POST
-app.post("/books", async (req, res) => {
-  const { title, author, year } = req.body;
-  if (!title || !author || !year) {
-    return res
-      .status(400)
-      .json({ message: "Title, Author, and Year are required 🤓" });
-  }
-  try {
-    const newBook = new Book({ title, author, year }); // Create a new Book document
-    await newBook.save(); // Save the book to the MongoDB collection
-    res.status(201).json(newBook); // Respond with the newly created book
-  } catch (error) {
-    res.status(500).json({ error: "Error adding book" });
-  }
-});
+// app.post("/books", async (req, res) => {
+//   const { title, author, year } = req.body;
+//   if (!title || !author || !year) {
+//     return res
+//       .status(400)
+//       .json({ message: "Title, Author, and Year are required 🤓" });
+//   }
+//   try {
+//     const newBook = new Book({ title, author, year }); // Create a new Book document
+//     await newBook.save(); // Save the book to the MongoDB collection
+//     res.status(201).json(newBook); // Respond with the newly created book
+//   } catch (error) {
+//     res.status(500).json({ error: "Error adding book" });
+//   }
+// });
 
-// PUT - Update a book by ID
+// // PUT - Update a book by ID
 app.put("/books/:id", async (req, res) => {
   const { id } = req.params;
   const { title, author, year } = req.body;
@@ -113,6 +144,6 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
+app.listen(PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
 });
