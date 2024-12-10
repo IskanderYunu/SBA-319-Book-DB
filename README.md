@@ -1,4 +1,5 @@
 Book Tracker Application
+
 The Book Tracker allows users to manage a collection of books. The app provides an intuitive interface for viewing a list of books, adding new ones, and editing or deleting entries. The project uses MongoDB as the database, Express.js for server-side logic, and EJS for rendering dynamic views. This lightweight application is designed to demonstrate RESTful API principles, incorporating robust CRUD functionality and a seamless connection between the client and database.
 
 API Routes and CRUD Operations
