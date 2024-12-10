@@ -1,6 +1,10 @@
+//npm install mongoose!
+//define schema!
+
 const express = require("express");
 const app = express();
 const port = 3000;
+const mongoose = require("mongoose");
 
 // Middleware to parse incoming request bodies
 app.use(express.json());
@@ -23,57 +27,70 @@ app.use((req, res, next) => {
   next();
 });
 
-// GET renders the books list on the home page
-app.get("/", (req, res) => {
-  res.render("index", { books: books }); // Pass books array to the view
+//Mongoose GET
+const Book = require("./models/Book"); // Assuming you have a Mongoose model for books
+
+app.get("/", async (req, res) => {
+  try {
+    const books = await Book.find(); // Retrieve all books from the MongoDB collection
+    res.render("index", { books }); // Pass the books array to the view
+  } catch (error) {
+    res.status(500).json({ error: "Error fetching books" });
+  }
 });
 
-// POST route to add a new book
-app.post("/books", (req, res) => {
+//Mongoose POST
+app.post("/books", async (req, res) => {
   const { title, author, year } = req.body;
   if (!title || !author || !year) {
     return res
       .status(400)
-      .json({ message: "Title, author, and year are required" });
+      .json({ message: "Title, Author, and Year are required 🤓" });
   }
-  const newBook = {
-    id: books.length + 1,
-    title,
-    author,
-    year,
-  };
-  books.push(newBook);
-  res.status(201).json(newBook);
+  try {
+    const newBook = new Book({ title, author, year }); // Create a new Book document
+    await newBook.save(); // Save the book to the MongoDB collection
+    res.status(201).json(newBook); // Respond with the newly created book
+  } catch (error) {
+    res.status(500).json({ error: "Error adding book" });
+  }
 });
 
 // PUT - Update a book by ID
-app.put("/books/:id", (req, res) => {
+app.put("/books/:id", async (req, res) => {
   const { id } = req.params;
   const { title, author, year } = req.body;
-  const book = books.find((book) => book.id === parseInt(id));
-
-  if (!book) {
-    return res.status(404).json({ message: "Book not found" });
+  try {
+    const updatedBook = await Book.findByIdAndUpdate(
+      id,
+      { title, author, year },
+      { new: true } // Return the updated document
+    );
+    if (!updatedBook) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+    res.json(updatedBook);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "An error occurred while updating the book" });
   }
-
-  book.title = title || book.title;
-  book.author = author || book.author;
-  book.year = year || book.year;
-
-  res.json(book);
 });
 
 // DELETE - Delete a book by ID
-app.delete("/books/:id", (req, res) => {
+app.delete("/books/:id", async (req, res) => {
   const { id } = req.params;
-  const bookIndex = books.findIndex((book) => book.id === parseInt(id));
-
-  if (bookIndex === -1) {
-    return res.status(404).json({ message: "Book not found" });
+  try {
+    const deletedBook = await Book.findByIdAndDelete(id); // Replace with MongoDB model logic
+    if (!deletedBook) {
+      return res.status(404).json({ message: "Book not found" });
+    }
+    res.status(204).send(); // No content, successful deletion
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "An error occurred while deleting the book" });
   }
-
-  books.splice(bookIndex, 1);
-  res.status(204).send(); // No content, successful deletion
 });
 
 // GET route to display details of a single book - /books/id number
